@@ -1,7 +1,9 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QMainWindow
+import numpy as np
+from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout, QWidget
+from PyQt5.QtGui import QPixmap, QImage
 from PyQt5.QtChart import QChart, QChartView, QLineSeries
-# pip install PyQtChart
+from pyqtgraph import ImageView
 
 class Window(QMainWindow):
     def __init__(self):
@@ -32,8 +34,24 @@ class Window(QMainWindow):
         # Create a QChartView object
         chartView = QChartView(chart)
 
-        # Set the chart view as the central widget of the window
-        self.setCentralWidget(chartView)
+        # Create an ImageView widget to display the spectrogram image
+        spectrogram = np.random.rand(200, 100)
+        imageView = ImageView(self)
+        imageView.setImage(spectrogram)
+
+        # Create a QVBoxLayout to hold the ImageView and chartView widgets
+        widget = QWidget()
+        layout = QVBoxLayout()
+
+        # Add the ImageView and chartView widgets to the layout
+        layout.addWidget(imageView)
+        layout.addWidget(chartView)
+
+        # Set the layout for the widget
+        widget.setLayout(layout)
+
+        # Set the widget as the central widget of the window
+        self.setCentralWidget(widget)
 
 # Create an instance of QApplication
 app = QApplication(sys.argv)
