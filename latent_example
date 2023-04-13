@@ -1,0 +1,57 @@
+#
+# In the case of wav2vec 2.0, the latent space is learned by a neural network that uses a masking technique to train on the audio data in an unsupervised manner.
+# The masking technique involves randomly masking certain segments of the audio input and training the model to predict the masked parts of the signal from the unmasked parts. 
+# This process encourages the model to learn a robust representation of the audio input that is invariant to certain types of perturbations, such as noise or missing data.
+
+
+
+# Import necessary packages
+import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.decomposition import LatentDirichletAllocation
+
+
+np.set_printoptions(linewidth = 200)
+
+# Preprocess the text by tokenizing it and removing stop words
+docs = ["The birds and wolfs in the forest were peacefully drinking water near the pond.",
+                     "The trees were full of birds, and the water was in a good shape",
+                     "The economic impact of tightening interest rates."]
+
+# Define the number of topics and the number of iterations
+num_topics = 2
+num_iterations = 1000
+
+# Convert the preprocessed text into a document-term matrix
+# CountVectorizer is a text preprocessing technique in natural language processing (NLP) that is used to convert a collection of text documents into a matrix of token counts. It creates a document-term matrix where each row represents a document and each column represents a word in the corpus. The values in the matrix represent the number of times each word appears in each document.
+
+vectorizer = CountVectorizer()
+doc_term_matrix = vectorizer.fit_transform(docs) # row is document, column is word 
+plt.title('documents in terms of the vocabulary')
+plt.imshow(doc_term_matrix.toarray(), cmap='hot', interpolation='nearest')
+plt.show()
+
+# Fit the LDA model to the document-term matrix
+lda_model = LatentDirichletAllocation(n_components=num_topics, max_iter=num_iterations)
+lda_model.fit(doc_term_matrix)
+
+# Extract the learned topic-word distribution and document-topic distribution
+topic_word_distribution = lda_model.components_
+document_topic_distribution = lda_model.transform(doc_term_matrix)
+fig, ax = plt.subplots()
+ax.plot(topic_word_distribution[0], color='blue', label='Row 1')
+ax.plot(topic_word_distribution[1], color='red', label='Row 2')
+
+# Print the learned topics and their top words
+feature_names = vectorizer.get_feature_names_out()
+for topic_idx, topic in enumerate(topic_word_distribution):
+    top_words = [feature_names[i] for i in topic.argsort()[:-5 - 1:-1]]
+    print(f"Topic {topic_idx+1}: {', '.join(top_words)}")
+
+# Print the latent representation of each document
+for doc_idx, doc in enumerate(docs):
+    topic_probabilities = document_topic_distribution[doc_idx]
+    print(f"Document {doc_idx+1}: {', '.join([f'Topic {i+1}: {prob:.2f}' for i, prob in enumerate(topic_probabilities)])}")
+
+print(' ')

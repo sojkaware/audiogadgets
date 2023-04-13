@@ -1,0 +1,19 @@
+from PyQt5.QtWidgets import QApplication
+from fft_recorder import Gui_VoiceInput1
+from debug_gui import Gui_VoiceInputDebug
+
+if __name__ == "__main__":
+    app = QApplication([])
+
+    # create instances of both classes
+    fft_app = Gui_VoiceInput1()
+    debug_gui = Gui_VoiceInputDebug()
+
+    # connect the signal from fft_app to a slot in other_gui
+    fft_app.data_signal.connect(debug_gui.receive_data)
+
+    # show the main app window
+    fft_app.show()
+
+    # start the event loop
+    app.exec_()
