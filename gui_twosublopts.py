@@ -1,8 +1,8 @@
 # pip install pyqtchart
 from PyQt5.QtWidgets import QMainWindow, QPlainTextEdit, QVBoxLayout, QHBoxLayout, QWidget
-from PyQt5.QtCharts import QtCharts
+from PyQt5.QtChart import QChart, QChartView, QLineSeries, QValueAxis
 from PyQt5.QtGui import QImage, QPixmap
-from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtCore import Qt, QMargins, pyqtSignal
 
 
 class GuiTwoSubplots(QMainWindow):
@@ -12,12 +12,12 @@ class GuiTwoSubplots(QMainWindow):
         super().__init__()
 
         # create the chart and chart view for the line plot
-        self.line_chart = QtCharts.QChart()
-        self.line_chart_view = QtCharts.QChartView(self.line_chart)
+        self.line_chart = QChart()
+        self.line_chart_view = QChartView(self.line_chart)
 
         # create the chart and chart view for the spectrogram
-        self.spec_chart = QtCharts.QChart()
-        self.spec_chart_view = QtCharts.QChartView(self.spec_chart)
+        self.spec_chart = QChart()
+        self.spec_chart_view = QChartView(self.spec_chart)
 
         # create the text area
         self.text_area = QPlainTextEdit()
@@ -49,20 +49,20 @@ class GuiTwoSubplots(QMainWindow):
         self.line_chart.removeAllSeries()
 
         # create a new line series and add it to the chart
-        series = QtCharts.QLineSeries()
+        series = QLineSeries()
         for x, y in zip(x_data, y_data):
             series.append(x, y)
         self.line_chart.addSeries(series)
 
         # create the X and Y axes and set their range
-        axis_x = QtCharts.QValueAxis()
+        axis_x = QValueAxis()
         axis_x.setRange(min(x_data), max(x_data))
-        self.line_chart.addAxis(axis_x, QtCharts.Qt.AlignBottom)
+        self.line_chart.addAxis(axis_x, Qt.AlignBottom)
         series.attachAxis(axis_x)
 
-        axis_y = QtCharts.QValueAxis()
+        axis_y = QValueAxis()
         axis_y.setRange(min(y_data), max(y_data))
-        self.line_chart.addAxis(axis_y, QtCharts.Qt.AlignLeft)
+        self.line_chart.addAxis(axis_y, Qt.AlignLeft)
         series.attachAxis(axis_y)
 
         # set the title and axis labels
@@ -78,7 +78,7 @@ class GuiTwoSubplots(QMainWindow):
         self.spec_chart.removeAllSeries()
 
         # create a new series and add it to the chart
-        series = QtCharts.QLineSeries()
+        series = QLineSeries()
         for i, row in enumerate(data):
             for j, val in enumerate(row):
                 series.append(j, i, val)

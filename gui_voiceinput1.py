@@ -1,28 +1,26 @@
 
 #pip install PyQt5 numpy sounddevice
 
-
-
-# from PyQt5.QtCore import QPointF, QSize
-# from PyQt5.QtGui import QIcon
-# from PyQt5.QtWidgets import QComboBox, QMainWindow, QPushButton, QVBoxLayout, QWidget
-
-
 import sys
-from PyQt5.QtChart import QChart, QChartView, QLineSeries
 from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QPushButton, QComboBox, QWidget
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import QSize , pyqtSignal, QObject # this is for interaction between main gu ind testing
 import sounddevice as sd
 import numpy as np
 import threading
-from voice_asr import VoiceASR
 
-class FFTRecorderApp(QMainWindow):
+
+class VoiceInputApp(QMainWindow):
+    data_signal = pyqtSignal(np.ndarray)
+
 
     def __init__(self):
         super().__init__()
+        # super(First_Window, self).__init__()
 
+        # Signal for sending data
+        
+        
         # Set up the user interface
         self.init_ui()
 
@@ -49,18 +47,6 @@ class FFTRecorderApp(QMainWindow):
         self.record_button.clicked.connect(self.record_audio)
         layout.addWidget(self.record_button)
 
-
-        layout.addStretch(1)
-
-        # Create a label for the plot
-        plot_label = QLabel("Data Plot")
-        layout.addWidget(plot_label)
-
-        # Create the plot widget and add it to the layout
-        self.plot_widget = QChartView()
-        layout.addWidget(self.plot_widget)
-
-
         # Set the layout
         main_widget.setLayout(layout)
 
@@ -78,9 +64,12 @@ class FFTRecorderApp(QMainWindow):
 
         def audio_callback(indata, frames, time, status):
             # Compute the FFT of the audio chunk
-            fft_data = np.fft.rfft(indata[:, 0])
-            print(indata.shape)
-            #print(fft_data)
+            fft_data = np.absolute(np.fft.rfft(indata[:, 0]))
+            #print(indata.shape)
+            #print(fft_data) 
+            #print("Emited")
+            self.data_signal.emit(indata[:, 0])
+
 
         # Open the audio stream and start recording
         with sd.InputStream(samplerate=None, channels=1, blocksize=chunk_size, callback=audio_callback):
@@ -89,38 +78,18 @@ class FFTRecorderApp(QMainWindow):
             print("Recording stopped...")
 
 
-    def plot_data(self, data):
-        # create a QLineSeries object to hold the data
-        series = QLineSeries()
-
-        # add data points to the series
-        for i in range(len(data)):
-            series.append(QPointF(i, data[i]))
-
-        # create a QChart object and add the series to it
-        chart = QChart()
-        chart.addSeries(series)
-
-        # set the chart title and axis labels
-        chart.setTitle("Data Plot")
-        chart.setAnimationOptions(QChart.SeriesAnimations)
-        chart.createDefaultAxes()
-        chart.axes()[0].setTitleText("X Axis")
-        chart.axes()[1].setTitleText("Y Axis")
-
-        # create a QChartView object and set the chart as its model
-        self.plot_widget.setChart(chart)
-
-        # show the chart view
-        self.plot_widget.show()
-
-
-
-
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    gui_app = FFTRecorderApp()
+    gui_app = VoiceInputApp()
     gui_app.show()
+
+    from test2 import GuiTwoSubplotsImageLinePlot
+    debug_gui = GuiTwoSubplotsImageLinePlot()
+    debug_gui.show()
+
+    # Connect the VoiceInputApp's fft_data_signal to the OtherGUI's update_plot method
+    gui_app.data_signal.connect(debug_gui.update_plot)
+    #gui_app.data_signal.connect(debug_gui.data_signal.emit)
     sys.exit(app.exec_())
 
 
