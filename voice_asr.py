@@ -1,6 +1,7 @@
 import speech_recognition as sr
 
 
+
 class VoiceASR:
     def __init__(self):
         self.r = sr.Recognizer()
